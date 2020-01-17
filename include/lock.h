@@ -12,7 +12,8 @@
 //    /device/[ESP MAC Address]/register => [TYPE]    - Register a type of device using the mac address, e.g. a "HACKLAND_LOCK"
 #define BASE_TOPIC "/device"
 
-void v_lock_task(void *);
+void v_unlock_task(void *);
+void kill_unlock_task();
 void device_unlock_for_time(int);
 void lock_handle_incoming_data(esp_mqtt_event_handle_t);
 char *lock_get_topic_register();

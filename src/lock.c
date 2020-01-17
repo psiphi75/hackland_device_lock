@@ -13,9 +13,10 @@
 #include "common.h"
 #include "lock.h"
 
-#define DEVICE_TYPE ("LOCK")
+#define DEVICE_TYPE ("lock")
 
 static const char *TAG = "LOCK";
+static TaskHandle_t unlock_task_handle = NULL;
 
 //
 // Globals
@@ -35,31 +36,44 @@ void device_lock() {
     gpio_set_level(GPIO_04, GPIO_ON);
 }
 
-void v_lock_task( void * fp_sleep_time_secs ) {
+void v_unlock_task( void * fp_sleep_time_secs ) {
 
     int sleep_time_secs = (int)fp_sleep_time_secs;
 
-    if (sleep_time_secs <= 0 || sleep_time_secs >= TIME_24_HOURS_IN_SEC) {
-        vTaskDelete(NULL);
-        return;
-    }
+    if (sleep_time_secs <= 0) goto CLEAN_EXIT;
+    if (sleep_time_secs >= TIME_24_HOURS_IN_SEC) goto CLEAN_EXIT;
 
     device_unlock();
     ESP_LOGW(TAG, "Sleeping for %d seconds", sleep_time_secs);
     vTaskDelay((sleep_time_secs * 1000) / portTICK_PERIOD_MS);
     device_lock();
 
-    // Delete self
-    vTaskDelete(NULL);
+CLEAN_EXIT:
+    // You need to vTaskDelete to cleaning exit the thread
+    kill_unlock_task();
 }
 
+void kill_unlock_task() {
+    if (unlock_task_handle == NULL) {
+        ESP_LOGI(TAG, "Task is already dead");
+        return;
+    }
+
+    TaskHandle_t tmp_task_handle = unlock_task_handle;
+    unlock_task_handle = NULL;
+    vTaskDelete(tmp_task_handle);
+}
 
 void device_unlock_for_time(int sleep_time_secs) {
     TaskHandle_t xHandle = NULL;
 
+    // Kill the task if it's already running.
+    kill_unlock_task();
+
     // Create a task that will stop after a certain time
-    xTaskCreate( v_lock_task, "LOCKER_CODE", 2048, (void *)sleep_time_secs, tskIDLE_PRIORITY, &xHandle );
-    configASSERT( xHandle );
+    xTaskCreate( v_unlock_task, "LOCKER_CODE", 2048, (void *)sleep_time_secs, tskIDLE_PRIORITY, &xHandle );
+
+    unlock_task_handle = xHandle;
 }
 
 void lock_handle_incoming_data(esp_mqtt_event_handle_t event) {
@@ -109,3 +123,4 @@ void lock_init() {
     io_conf.pull_up_en = 0;
     gpio_config(&io_conf);
 }
+
