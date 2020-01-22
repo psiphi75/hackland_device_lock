@@ -2,10 +2,10 @@
 #ifndef _LOCK_H_
 #define _LOCK_H_
 
-#define GPIO_ON         1                           // Turn it on
-#define GPIO_OFF        0                           // Turn it off
-#define GPIO_04         4                           // The lock pin
-#define GPIO_OUTPUT_PIN_SEL  (1ULL << GPIO_04)
+#define GPIO_ON 1  // Turn it on
+#define GPIO_OFF 0 // Turn it off
+#define GPIO_04 4  // D2: The lock pin
+#define GPIO_OUTPUT_PIN_SEL (1ULL << GPIO_04)
 
 // MQTT topics are:
 //    /device/[ESP MAC Address]/unlock => [Time in seconds] - How long a device should unlock for, default is locked.
