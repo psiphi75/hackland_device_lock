@@ -150,11 +150,6 @@ void reconnect()
         if (mqtt_client.connect(clientId.c_str()))
         {
             Serial.println("connected");
-            // Once connected, publish an announcement...
-            mqtt_client.publish("outTopic", "hello world");
-            // ... and resubscribe
-            mqtt_client.subscribe("inTopic");
-
             // Register to the server
             publishRegistration();
         }
