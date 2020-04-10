@@ -1,5 +1,7 @@
 # Hackland Device Lock
 
+**This repo has moved to https://bitbucket.org/retepmahnob/hacklandaccess**.
+
 This repository contains code that will run on a NodeMCU (ESP8266). It can be used as a lock/unlock mechanism. It uses
 the MQTT protocol via Wifi.
 
